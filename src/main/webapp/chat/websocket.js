@@ -40,27 +40,45 @@
 
 var wsUri = 'ws://' + document.location.host 
         + document.location.pathname.substr(0, document.location.pathname.indexOf("/faces"))
-        + '/prototpye-1.0-SNAPSHOT/websocket/room223';
+        + '/prototpye-1.0-SNAPSHOT/websocket/';
 console.log(wsUri);
-var websocket = new WebSocket(wsUri);
+//var websocket = new WebSocket(wsUri);
+
+var wss = {};
 
 var username;
-websocket.onopen = function(evt) { onOpen(evt); };
-websocket.onmessage = function(evt) { onMessage(evt); };
-websocket.onerror = function(evt) { onError(evt); };
-websocket.onclose = function(evt) { onClose(evt); };
+
 var output = document.getElementById("output");
 var textField = document.getElementById("textField");
 var users = document.getElementById("users");
 var chatlog = document.getElementById("chatlog");
+var roomNumber = document.getElementById("roomNumber");
+
+function getWebsocket(){
+
+    if(wss[roomNumber.value] !== undefined){
+        return wss[roomNumber.value];
+    } else {
+        var websocket = new WebSocket(wsUri + roomNumber.value);
+
+        websocket.onopen = function(evt) { onOpen(evt); };
+        websocket.onmessage = function(evt) { onMessage(evt); };
+        websocket.onerror = function(evt) { onError(evt); };
+        websocket.onclose = function(evt) { onClose(evt); };
+
+        wss[roomNumber.value] = websocket;
+        return websocket;
+    }
+
+}
 
 function join() {
     username = textField.value;
-    websocket.send(username + " joined");
+    getWebsocket().send(username + " joined");
 }
 
 function send_message() {
-    websocket.send(username + ": " + textField.value);
+    getWebsocket().send(username + ": " + textField.value);
 }
 
 function onOpen() {
@@ -85,7 +103,7 @@ function onError(evt) {
 }
 
 function disconnect() {
-    websocket.close();
+    getWebsocket().close();
 }
 
 function writeToScreen(message) {

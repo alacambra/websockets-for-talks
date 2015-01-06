@@ -44,36 +44,37 @@ import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedMap;
+import java.util.*;
 
 /**
  * @author Arun Gupta
  */
 @ServerEndpoint("/websocket/{room}")
 public class ChatServer {
-
-private static final Set<Session> peers = Collections.synchronizedSet(new HashSet<Session>());
+    private static final Map<String, Set<Session>> peers = Collections.synchronizedMap(new HashMap<String, Set<Session>>());
 
     @OnOpen
     public void onOpen(Session peer,  @PathParam("room") String room) {
-        peers.add(peer);
-        System.out.println("init on room " + room);
+        if (!peers.containsKey(room)){
+            peers.put(room, Collections.synchronizedSet(new HashSet<Session>()));
+        }
+
+        peers.get(room).add(peer);
+        System.out.println("init on room " + room + " on " + this.toString() + " with session " + peer );
+
     }
 
     @OnClose
-    public void onClose(Session peer) {
-        peers.remove(peer);
-        System.out.println("close");
+    public void onClose(Session peer, @PathParam("room") String room) {
+        peers.get(room).remove(peer);
+        System.out.println("close" + " on " + this.toString() + " with session " + peer );
     }
 
     @OnMessage
     public void message(String message, Session client, @PathParam("room") String room) throws IOException, EncodeException {
-        System.out.println("messag for room " + room );
-        for (Session peer : peers) {
-           peer.getBasicRemote().sendObject(message);
+        System.out.println("message for room " + room + " on " + this.toString() + " with session " + client );
+        for (Session peer : peers.get(room)) {
+            peer.getBasicRemote().sendObject(message);
         }
     }
 }
