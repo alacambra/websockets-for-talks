@@ -1,12 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+      xmlns:h="http://xmlns.jcp.org/jsf/html">
 
 <body>
 <div>
     <form action="">
-
         <table>
             <tr>
                 <td>
@@ -28,7 +27,16 @@
                 </td>
             </tr>
         </table>
-
+        <h:form>
+            <h:dataTable id="user" value="#{userController.users}" var="user">
+                <h:column>
+                    ${user.name}
+                </h:column>
+            </h:dataTable>
+            <h:commandButton id="loadData" value="load data in db" action="#{userController.loadData()}"></h:commandButton>
+            <h:commandButton id="getData" value="fetchDbData" action="#{userController.getUsers()}"></h:commandButton>
+            <h:commandButton id="persistLogs" value="load data in db" action="#{userController.persistLogsNow()}"></h:commandButton>
+        </h:form>
     </form>
     <div id="output"></div>
     <script language="javascript" type="text/javascript" src="${facesContext.externalContext.requestContextPath}/chat/websocket.js"></script>
