@@ -38,9 +38,7 @@
  * holder.
  */
 
-var wsUri = 'ws://' + document.location.host 
-        + document.location.pathname.substr(0, document.location.pathname.indexOf("/faces"))
-        + '/prototpye-1.0-SNAPSHOT/websocket/';
+var wsUri = 'ws://' + document.location.host + document.location.pathname + 'chat/';
 console.log(wsUri);
 //var websocket = new WebSocket(wsUri);
 
@@ -74,11 +72,32 @@ function getWebsocket(){
 
 function join() {
     username = textField.value;
-    getWebsocket().send(username + " joined");
+    var message = {};
+    message.type = "connection";
+    message.msg = username + " joined";
+    var ws  = getWebsocket();
+
+    waitForConnection(ws, function () {
+        ws.send(JSON.stringify(message));
+    }, 1000);
+}
+
+function waitForConnection(ws, callback, interval) {
+    if (ws.readyState === 1) {
+        callback();
+    } else {
+        var that = this;
+        setTimeout(function () {
+            waitForConnection(ws, callback);
+        }, interval);
+    }
 }
 
 function send_message() {
-    getWebsocket().send(username + ": " + textField.value);
+    var message = {};
+    message.type = "message";
+    message.msg = username + ": " + textField.value;
+    getWebsocket().send(JSON.stringify(message));
 }
 
 function onOpen() {
@@ -91,10 +110,11 @@ function onClose() {
 
 function onMessage(evt) {
     writeToScreen("RECEIVED: " + evt.data);
-    if (evt.data.indexOf("joined") !== -1) {
-        users.innerHTML += evt.data.substring(0, evt.data.indexOf(" joined")) + "\n";
+    var data = JSON.parse(evt.data);
+    if (data.type === "connection") {
+        users.innerHTML += data.msg.substring(0, data.msg.indexOf(" joined")) + "\n";
     } else {
-        chatlog.innerHTML += evt.data + "\n";
+        chatlog.innerHTML += data.msg + "\n";
     }
 }
 

@@ -37,44 +37,42 @@
  * only if the new code is made subject to such option by the copyright
  * holder.
  */
-package com.poolingpeople.websocket;
+package com.poolingpeople.talks.boundary;
 
-import javax.sound.midi.Soundbank;
+import com.poolingpeople.talks.entities.WSMessage;
+
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * @author Arun Gupta
- */
-@ServerEndpoint("/websocket/{room}")
+@ServerEndpoint(value = "/chat/{room}" , encoders = {ChatEncoder.class}, decoders = {ChatDecoder.class})
 public class ChatServer {
     private static final Map<String, Set<Session>> peers = Collections.synchronizedMap(new HashMap<String, Set<Session>>());
 
     @OnOpen
-    public void onOpen(Session peer,  @PathParam("room") String room) {
+    public void onOpen(Session peer,  @PathParam("room") String room) throws IOException, EncodeException {
         if (!peers.containsKey(room)){
-            peers.put(room, Collections.synchronizedSet(new HashSet<Session>()));
+            peers.put(room, new HashSet<Session>());
         }
 
         peers.get(room).add(peer);
-        System.out.println("init on room " + room + " on " + this.toString() + " with session " + peer );
+        System.out.println("init on room " + room + " on " + this.hashCode() + " with session " + peer.hashCode());
 
     }
 
     @OnClose
     public void onClose(Session peer, @PathParam("room") String room) {
         peers.get(room).remove(peer);
-        System.out.println("close" + " on " + this.toString() + " with session " + peer );
     }
 
     @OnMessage
-    public void message(String message, Session client, @PathParam("room") String room) throws IOException, EncodeException {
-        System.out.println("message for room " + room + " on " + this.toString() + " with session " + client );
+    public void message(WSMessage message, Session client, @PathParam("room") String room) throws IOException, EncodeException {
         for (Session peer : peers.get(room)) {
-            peer.getBasicRemote().sendObject(message);
+            peer.getBasicRemote().sendObject(new WSMessage(message.getType().toString(),
+                    message.getType() == WSMessage.Type.connection ? message.getBody() :
+                    message + " | for room " + room + " on " + this.hashCode() + " with session " + client.hashCode()));
         }
     }
 }
