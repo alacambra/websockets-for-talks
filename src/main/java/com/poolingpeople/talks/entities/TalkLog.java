@@ -30,6 +30,7 @@ public class TalkLog {
     @ManyToOne
     Talk talk;
 
+    @Lob
     String log;
 
     public Long getId() {

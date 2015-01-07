@@ -33,11 +33,12 @@ public class MessagePersister {
         logs.get(talkId).add(log);
     }
 
-    @Schedule(second = "*/15")
-    @Transactional
+    @Schedule(minute="*/1", hour="*")
     public void persistLogs(){
+        System.out.println("Saving logs....");
         for(Map.Entry<Long, List<TalkLog>> talklog : logs.entrySet()){
             persistLogsOfTalk(talklog.getKey(), talklog.getValue());
+            logs.put(talklog.getKey(), new LinkedList<TalkLog>());
         }
     }
 
@@ -79,7 +80,6 @@ public class MessagePersister {
                 currentTalkLog.setTalk(talk);
                 talk.getTalkLogs().add(currentTalkLog);
                 em.persist(talk);
-
                 currentAuthor = userlog.getAuthor();
                 currentTalkLog = new TalkLog();
                 currentTalkLog.append(userlog);
