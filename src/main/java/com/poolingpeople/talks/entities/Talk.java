@@ -71,6 +71,10 @@ public class Talk {
 
     @Override
     public boolean equals(Object obj) {
-        return super.equals(obj);
+
+        if(!(obj instanceof Talk)){
+            return false;
+        }
+        return ((Talk)obj).getId() == id;
     }
 }

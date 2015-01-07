@@ -125,6 +125,82 @@ public class MessagePersisterIT {
         tx.commit();
     }
 
+    @Test
+    public void testPersistLogsTwoUser() throws Exception {
+
+        StringBuffer buffer1 = new StringBuffer();
+        StringBuffer buffer2 = new StringBuffer();
+        StringBuffer buffer3 = new StringBuffer();
+        StringBuffer buffer4 = new StringBuffer();
+        StringBuffer buffer5 = new StringBuffer();
+        StringBuffer buffer6 = new StringBuffer();
+
+//      Talk1
+        TalkLog log1 = getRandomTalkLog(userA);
+        messagePersister.addLog(123L, log1);
+        buffer1.append(log1.getLog());
+
+        TalkLog log2 = getRandomTalkLog(userA);
+        messagePersister.addLog(123L, log2);
+        buffer1.append("\n" + log2.getLog());
+
+        TalkLog log3 = getRandomTalkLog(userB);
+        messagePersister.addLog(123L, log3);
+        buffer2.append(log3.getLog());
+
+        TalkLog log4 = getRandomTalkLog(userA);
+        messagePersister.addLog(123L, log4);
+        buffer3.append(log4.getLog());
+
+
+        //Talk 2
+        TalkLog log5 = getRandomTalkLog(userA);
+        messagePersister.addLog(33L, log1);
+        buffer4.append(log5.getLog());
+
+        TalkLog log6 = getRandomTalkLog(userA);
+        messagePersister.addLog(33L, log2);
+        buffer4.append("\n" + log6.getLog());
+
+        TalkLog log7 = getRandomTalkLog(userB);
+        messagePersister.addLog(33L, log3);
+        buffer5.append(log7.getLog());
+
+        TalkLog log8 = getRandomTalkLog(userA);
+        messagePersister.addLog(33L, log4);
+        buffer6.append(log8.getLog());
+
+        tx.begin();
+        messagePersister.persistLogs();
+        tx.commit();
+        tx = em.getTransaction();
+        tx.begin();
+
+        Talk t = em.createNamedQuery("talk.getById", Talk.class).setParameter("id", 123L).getSingleResult();
+        assertThat(t.getUuid(), Is.is(123L));
+        List<TalkLog> logs = t.getTalkLogs();
+        assertThat(logs.size(), Is.is(3));
+        assertThat(logs.get(0).getLog(), Is.is(buffer1.toString()));
+        assertThat(logs.get(0).getAuthor(), Is.is(userA));
+        assertThat(logs.get(1).getLog(), Is.is(buffer2.toString()));
+        assertThat(logs.get(1).getAuthor(), Is.is(userB));
+        assertThat(logs.get(2).getLog(), Is.is(buffer3.toString()));
+        assertThat(logs.get(2).getAuthor(), Is.is(userA));
+
+        t = em.createNamedQuery("talk.getById", Talk.class).setParameter("id", 33L).getSingleResult();
+        assertThat(t.getUuid(), Is.is(33L));
+        logs = t.getTalkLogs();
+        assertThat(logs.size(), Is.is(3));
+        assertThat(logs.get(0).getLog(), Is.is(buffer4.toString()));
+        assertThat(logs.get(0).getAuthor(), Is.is(userA));
+        assertThat(logs.get(1).getLog(), Is.is(buffer5.toString()));
+        assertThat(logs.get(1).getAuthor(), Is.is(userB));
+        assertThat(logs.get(2).getLog(), Is.is(buffer6.toString()));
+        assertThat(logs.get(2).getAuthor(), Is.is(userA));
+
+        tx.commit();
+    }
+
     private TalkLog getRandomTalkLog(){
         return getRandomTalkLog(userA);
     }
