@@ -49,6 +49,7 @@ public class MessagePersister {
         Talk talk;
         if(talks.size() == 0){
             talk = new Talk();
+            talk.setUuid(talkId);
             talk.setTitle("that is a new talk:" + new Date());
             talk.setCreationTime(Calendar.getInstance());
             em.persist(talk);
@@ -66,6 +67,7 @@ public class MessagePersister {
 
                 currentAuthor = userlog.getAuthor();
                 currentTalkLog = new TalkLog();
+                currentTalkLog.setTalk(talk);
                 currentTalkLog.append(userlog);
 
             } else if(currentAuthor.equals(userlog.getAuthor())){
@@ -74,13 +76,18 @@ public class MessagePersister {
 
             } else {
 
+                currentTalkLog.setTalk(talk);
                 talk.getTalkLogs().add(currentTalkLog);
                 em.persist(talk);
+
                 currentAuthor = userlog.getAuthor();
                 currentTalkLog = new TalkLog();
                 currentTalkLog.append(userlog);
 
             }
         }
+
+        talk.getTalkLogs().add(currentTalkLog);
+        em.persist(talk);
     }
 }

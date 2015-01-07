@@ -9,7 +9,7 @@ import java.util.List;
  */
 
 @NamedQueries({
-        @NamedQuery(name = "talk.getById", query = "SELECT talk FROM Talk as talk where talk.id = :id ")
+        @NamedQuery(name = "talk.getById", query = "SELECT talk FROM Talk as talk where talk.uuid = :id ")
 })
 @Entity
 public class Talk {
@@ -17,6 +17,10 @@ public class Talk {
     @Id
     @GeneratedValue
     Long id;
+
+    @Column(unique = true)
+    Long uuid;
+
     String title;
 
     @Temporal(TemporalType.DATE)
@@ -31,6 +35,14 @@ public class Talk {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(Long uuid) {
+        this.uuid = uuid;
     }
 
     public String getTitle() {
@@ -55,5 +67,10 @@ public class Talk {
 
     public void setCreationTime(Calendar creationTime) {
         this.creationTime = creationTime;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 }

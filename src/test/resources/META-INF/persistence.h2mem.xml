@@ -9,6 +9,9 @@
         <class>com.poolingpeople.talks.entities.TalkLog</class>
         <properties>
 
+            <property name = "hibernate.show_sql" value = "true" />
+            <property name="eclipselink.logging.level" value="FINE"/>
+
             <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:talksh2;create=true"/>
             <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>

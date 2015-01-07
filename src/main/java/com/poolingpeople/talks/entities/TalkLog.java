@@ -1,5 +1,6 @@
 package com.poolingpeople.talks.entities;
 
+import javax.ejb.BeforeCompletion;
 import javax.persistence.*;
 import java.util.Calendar;
 import java.util.Date;
@@ -8,6 +9,9 @@ import java.util.Date;
  * Created by alacambra on 1/6/15.
  */
 @Entity
+//@NamedNativeQueries({
+//        @NamedQuery(name = "talklog.getByTaskId", va)
+//})
 public class TalkLog {
 
     @Id
@@ -78,6 +82,11 @@ public class TalkLog {
         }
 
         logBuilder.append("\n" + log.getLog());
+    }
+
+    @PrePersist
+    private void buildLog(){
+        log = logBuilder.toString();
     }
 
 

@@ -8,6 +8,10 @@
         <class>com.poolingpeople.talks.entities.User</class>
         <class>com.poolingpeople.talks.entities.TalkLog</class>
         <properties>
+
+            <property name = "hibernate.show_sql" value = "true" />
+            <property name="eclipselink.logging.level" value="FINE"/>
+
             <property name="javax.persistence.jdbc.url" value="jdbc:derby:./talks;create=true"/>
             <property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
             <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
